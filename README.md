@@ -1,5 +1,5 @@
 # cs330FinalProject
-Assignment5 Android App Sockets To-do List
+Assignment #5 Android App Sockets To-do List
 
 This project has two core parts which are the following
 
