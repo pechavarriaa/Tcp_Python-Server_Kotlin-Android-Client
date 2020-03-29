@@ -38,11 +38,13 @@
             android:text="@string/delete"/>
     </LinearLayout>
 
-    <ListView
+    
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listView"
         android:layout_below="@id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:choiceMode="multipleChoice"/>
+
 
 </RelativeLayout>
