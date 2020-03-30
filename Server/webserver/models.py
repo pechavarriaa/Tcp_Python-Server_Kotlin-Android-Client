@@ -1,4 +1,4 @@
-from app import db
+from database import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -29,9 +29,3 @@ class todolist(db.Model):
 
     def __init__(self, todoitem):
         self.todoitem = todoitem
-
-
-if __name__ == "__main__":
-    print("Creating database tables...")
-    db.create_all()
-    print("Done!")
