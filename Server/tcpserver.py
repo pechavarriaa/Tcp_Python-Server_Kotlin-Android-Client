@@ -85,11 +85,11 @@ def dbConnection(args):
     '''
       Create Engine and session to use db
     '''
-    serverengine = create_engine('sqlite:///pserver.db')
+    serverengine = create_engine('sqlite:////home/cs330FinalProject/Server/pserver.db')
     metadata = MetaData()
     metadata.reflect(serverengine)
     Base = automap_base(metadata=metadata)
-    Base.prepare(serverengine, reflect=True)
+    Base.prepare()
     user = Base.classes.user
     todolist = Base.classes.todolist
     serversession = Session(serverengine)
