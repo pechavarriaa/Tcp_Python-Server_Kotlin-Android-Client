@@ -89,7 +89,7 @@ def dbConnection(args):
     metadata = MetaData()
     metadata.reflect(serverengine)
     Base = automap_base(metadata=metadata)
-    Base.prepare()
+    Base.prepare(serverengine, reflect=True)
     user = Base.classes.user
     todolist = Base.classes.todolist
     serversession = Session(serverengine)
