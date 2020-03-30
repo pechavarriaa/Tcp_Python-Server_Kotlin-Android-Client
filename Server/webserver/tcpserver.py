@@ -101,7 +101,7 @@ def dbConnection(arglist):
     if all(arg in args for arg in ('user', 'password')):
         answer = authClient(user, args['user'],
                             args['password'], serversession)
-    if all(arg in args for arg in ('user', 'password', 'regiser')):
+    if all(arg in args for arg in ('user', 'password', 'register')):
         answer = registerUser(user, args['user'],
                               args['password'], serversession)
     if all(arg in args for arg in ('user', 'password', 'todoitem')):
