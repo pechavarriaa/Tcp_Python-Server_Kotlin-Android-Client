@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # receive argument list to check in the db
 
 
-def dbConnection(arglist):
+def dbConnection(args):
     '''
        define API functions to deal with user and todo contents
        simulating an HTTP request
@@ -20,9 +20,9 @@ def dbConnection(arglist):
     def authClient(user, currentUser, currentPassword, serversession):
         response = dict()
         try:
-            qry = serversession.query(user.username, user.password).filter(
-                user.username == currentUser).first()
-            if qry and check_password_hash(qry[1], currentPassword):
+            getUser = serversession.query(user).filter(
+                user.username == currentUser).one()
+            if getUser and check_password_hash(getUser.password, currentPassword):
                 response['status'] = 200
             else:
                 response['status'] = 401
@@ -34,8 +34,10 @@ def dbConnection(arglist):
     def registerUser(user, currentUser, currentPassword, serversession):
         response = dict()
         try:
-            serversession.execute(user.insert().values(
-                username=currentUser, password=generate_password_hash(currentPassword)))
+            newUser = user(username=currentUser,
+                           password=generate_password_hash(currentPassword))
+            serversession.add(newUser)
+            serversession.commit()
             response['status'] = 200
         except:
             response['status'] = 500
@@ -45,8 +47,9 @@ def dbConnection(arglist):
     def setTodo(todolist, currentUser, todoitem, serversession):
         response = dict()
         try:
-            serversession.execute(todolist.insert().values(
-                username=currentUser, todoitem=todoitem))
+            newTodo = todolist(username=currentUser, todoitem=todoitem)
+            serversession.add(newTodo)
+            serversession.commit()
             response['status'] = 200
         except:
             response['status'] = 500
@@ -58,7 +61,7 @@ def dbConnection(arglist):
         try:
             serversession.query(todolist).filter(
                 todolist.username == currentUser, todolist.id == id).delete()
-            session.commit()
+            serversession.commit()
             response['status'] = 200
         except:
             response['status'] = 500
@@ -68,14 +71,10 @@ def dbConnection(arglist):
     def getTodos(todolist, currentUser, serversession):
         response = dict()
         try:
-            qry = serversession.query(todolist.id, todolist.todoitem).filter(
-                todolist.username == currentUser).order_by(todolist.date_created)
-            tupleList = []
-            for q in qry:
-                tupleList.append(q[0], q[1])
+            todos = serversession.query(todolist).filter(
+                todolist.username == currentUser).order_by(todolist.date_created).all()
             response['status'] = 200
-            response['todos'] = tupleList
-
+            response['todos'] = {todo.id:todo.todoitem for todo in todos}
         except:
             response['status'] = 500
         return response
@@ -96,7 +95,6 @@ def dbConnection(arglist):
       parse arguments to determine proper function response
     '''
 
-    args = json.loads(arglist)
     answer = {'status', 400}
     if all(arg in args for arg in ('user', 'password')):
         answer = authClient(user, args['user'],
@@ -142,7 +140,6 @@ class TCPServerHandler(socketserver.BaseRequestHandler):
 
         arglist = json.loads(self.request.recv(1024).decode('utf-8'))
         response = dbConnection(arglist)
-
         self.request.sendall(bytes(response, 'UTF-8'))
 
 
