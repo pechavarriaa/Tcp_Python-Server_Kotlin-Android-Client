@@ -1,5 +1,6 @@
 # socketserver to tcp connections
-import socketserver
+from socketserver import TCPServer, StreamRequestHandler
+import socket
 # json to retrieve data type
 import json
 # sqlalchemy as orm for sqlite db
@@ -74,7 +75,7 @@ def dbConnection(args):
             todos = serversession.query(todolist).filter(
                 todolist.username == currentUser).order_by(todolist.date_created).all()
             response['status'] = 200
-            response['todos'] = {todo.id:todo.todoitem for todo in todos}
+            response['todos'] = {todo.id: todo.todoitem for todo in todos}
         except:
             response['status'] = 500
         return response
@@ -130,17 +131,25 @@ def dbConnection(args):
     return json.dumps(answer)
 
 
-class TCPServerHandler(socketserver.BaseRequestHandler):
-    """
-    Class of server to handle connections and return
-    what is expected
-    """
-
+class Handler(StreamRequestHandler):
     def handle(self):
-
-        arglist = json.loads(self.request.recv(1024).decode('utf-8'))
+        # receive message, process request and send message back
+        arglist = json.loads(self.rfile.readline().strip().decode('utf-8'))
         response = dbConnection(arglist)
-        self.request.sendall(bytes(response, 'UTF-8'))
+        self.wfile.write(response.encode("utf-8"))
+
+
+class Server(TCPServer):
+
+    SYSTEMD_FIRST_SOCKET_FD = 3
+
+    def __init__(self, server_address, handler_cls):
+
+        TCPServer.__init__(
+            self, server_address, handler_cls, bind_and_activate=False)
+
+        self.socket = socket.fromfd(
+            self.SYSTEMD_FIRST_SOCKET_FD, self.address_family, self.socket_type)
 
 
 if __name__ == "__main__":
@@ -148,6 +157,5 @@ if __name__ == "__main__":
     Set host and port for communication and keep server alive
     """
     HOST, PORT = "0.0.0.0", 6500
-
-    with socketserver.TCPServer((HOST, PORT), TCPServerHandler) as server:
-        server.serve_forever()
+    server = Server((HOST, PORT), Handler)
+    server.serve_forever()
