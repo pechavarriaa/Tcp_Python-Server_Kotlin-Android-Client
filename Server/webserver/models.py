@@ -22,9 +22,10 @@ class User(UserMixin, db.Model):
 
 
 class todolist(db.Model):
-    __tablename__ = 'todo'
+    __tablename__ = 'todolist'
     id = db.Column(db.Integer, primary_key=True)
-    todoitem = db.Column(db.String(150))
+    username = db.Column(db.String(100))
+    todoitem = db.Column(db.String(150))    
     date_created = db.Column(db.DateTime,  default=db.func.current_timestamp())
 
     def __init__(self, todoitem):
