@@ -3,6 +3,8 @@ from socketserver import TCPServer, StreamRequestHandler
 import socket
 # json to retrieve data type
 import json
+#loggin info
+import logging
 # sqlalchemy as orm for sqlite db
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.automap import automap_base
@@ -135,6 +137,7 @@ class Handler(StreamRequestHandler):
     def handle(self):
         # receive message, process request and send message back
         arglist = json.loads(self.request.recv(1024).decode('utf-8'))
+        logging.info("From <%s>: %s" % (self.client_address, arglist))
         response = dbConnection(arglist)
         self.request.sendall(bytes(response, 'UTF-8'))
 
@@ -156,6 +159,7 @@ if __name__ == "__main__":
     """
     Set host and port for communication and keep server alive
     """
+    logging.basicConfig(level=logging.INFO)
     HOST, PORT = "0.0.0.0", 6500
     server = Server((HOST, PORT), Handler)
     server.serve_forever()
