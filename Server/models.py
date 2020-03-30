@@ -25,8 +25,10 @@ class todolist(db.Model):
     __tablename__ = 'todolist'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
-    todoitem = db.Column(db.String(150))    
+    todoitem = db.Column(db.String(150))
     date_created = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    __table_args__ = (db.Index('UI', username, todoitem, unique=True), {
+                      'extend_existing': True})
 
     def __init__(self, todoitem):
         self.todoitem = todoitem
