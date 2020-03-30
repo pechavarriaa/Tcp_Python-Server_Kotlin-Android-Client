@@ -1,4 +1,5 @@
 *.pyc
+*.sock
 __pycache__/
 serverenv/
 pserver.db
