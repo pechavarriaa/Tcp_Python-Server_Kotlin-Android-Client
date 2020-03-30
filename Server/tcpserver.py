@@ -134,9 +134,9 @@ def dbConnection(args):
 class Handler(StreamRequestHandler):
     def handle(self):
         # receive message, process request and send message back
-        arglist = json.loads(self.rfile.readline().strip().decode('utf-8'))
+        arglist = json.loads(self.request.recv(1024).decode('utf-8'))
         response = dbConnection(arglist)
-        self.wfile.write(response.encode("utf-8"))
+        self.request.sendall(bytes(response, 'UTF-8'))
 
 
 class Server(TCPServer):
