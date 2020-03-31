@@ -1,50 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout      xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout      xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/editText"
-        android:padding="20dp"
+    <TextView
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/add_an_item"
-        android:textColorHint="@color/black"
-        android:textColor="@color/black"/>
+        android:text="@string/app_name"
+        android:textAlignment="center"
+        android:fontFamily="@font/amatic_sc_bold"
+        android:textSize="45sp"
+        android:textColor="#000"
+        app:layout_constraintBottom_toTopOf="@id/sign"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <LinearLayout
-        android:id="@+id/linearLayout1"
+        android:id="@+id/sign"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:orientation="horizontal"
-        android:layout_below="@id/editText">
+        android:layout_margin="10dp"
+        android:background="@drawable/login_bg"
+        android:orientation="vertical"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:fontFamily="@font/amatic_sc_bold"
+            android:text="@string/sign_up"
+            android:textAlignment="center"
+            android:textColor="#000"
+            android:textSize="28sp" />
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:fontFamily="@font/amatic_sc_bold"
+            android:hint="@string/username" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:fontFamily="@font/amatic_sc_bold"
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/confirm_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:fontFamily="@font/amatic_sc_bold"
+            android:hint="@string/confirm_password"
+            android:inputType="textPassword" />
 
         <Button
-            android:id="@+id/add"
-            android:layout_weight="1"
-            android:layout_width="0dp"
+            android:id="@+id/submit_sign_up"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/add"/>
-        <Button
-            android:id="@+id/delete"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_marginStart="10dp"
-            android:layout_height="wrap_content"
-            android:text="@string/delete"/>
+            android:background="@drawable/btn_bg"
+            android:text="@string/sign_up"
+            android:fontFamily="@font/amatic_sc_bold"
+            android:textColor="#fff"
+            android:textSize="22sp" />
     </LinearLayout>
 
-    
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listView"
-        android:layout_below="@id/linearLayout1"
+    <TextView
+        android:id="@+id/login_instead"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:choiceMode="multipleChoice"/>
+        android:fontFamily="@font/amatic_sc_bold"
+        android:text="@string/login_instead"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textColor="#fff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sign" />
 
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,8 @@
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorAccent">#7C78F0</color>
     <color name="salmon">#F08D78</color>
+    <color name="lightBlue">#9996E7</color>
+    <color name="niceBlue">#514BF9</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="yellow">#FFFFCC</color>
