@@ -3,7 +3,7 @@ from socketserver import TCPServer, StreamRequestHandler
 import socket
 # json to retrieve data type
 import json
-#loggin info
+# logging info
 import logging
 # sqlalchemy as orm for sqlite db
 from sqlalchemy import create_engine, MetaData
@@ -59,6 +59,21 @@ def dbConnection(args):
 
         return response
 
+    def markTodo(todolist, currentUser, id, serversession):
+        response = dict()
+        try:
+            todo = serversession.query(todolist).filter(
+                todolist.username == currentUser, todolist.id == id).one()
+            # reverse state of todo
+            todo.done = not todo.done
+            serversession.add(todo)
+            serversession.commit()
+            response['status'] = 200
+        except:
+            response['status'] = 500
+
+        return response
+
     def removeTodo(todolist, currentUser, id, serversession):
         response = dict()
         try:
@@ -85,7 +100,8 @@ def dbConnection(args):
     '''
       Create Engine and session to use db
     '''
-    serverengine = create_engine('sqlite:////home/cs330FinalProject/Server/pserver.db')
+    serverengine = create_engine(
+        'sqlite:////home/cs330FinalProject/Server/pserver.db')
     metadata = MetaData()
     metadata.reflect(serverengine)
     Base = automap_base(metadata=metadata)
@@ -102,21 +118,31 @@ def dbConnection(args):
     if all(arg in args for arg in ('user', 'password')):
         answer = authClient(user, args['user'],
                             args['password'], serversession)
+    
     if all(arg in args for arg in ('user', 'password', 'register')):
         answer = registerUser(user, args['user'],
                               args['password'], serversession)
+    
     if all(arg in args for arg in ('user', 'password', 'todoitem')):
         answer = authClient(user, args['user'],
                             args['password'], serversession)
         if 'status' in answer and answer['status'] == 200:
             answer = setTodo(
                 todolist, args['user'], args['todoitem'], serversession)
+    
+    if all(arg in args for arg in ('user', 'password', 'marktodo')):
+        answer = authClient(user, args['user'],
+                            args['password'], serversession)
+        if 'status' in answer and answer['status'] == 200:
+            answer = markTodo(todolist, args['user'], args['marktodo'], serversession)
+    
     if all(arg in args for arg in ('user', 'password', 'todoitemremove')):
         answer = authClient(user, args['user'],
                             args['password'], serversession)
         if 'status' in answer and answer['status'] == 200:
             answer = removeTodo(
                 todolist, args['user'], args['todoitemremove'], serversession)
+
     if all(arg in args for arg in ('user', 'password', 'gettodos')):
         answer = authClient(user, args['user'],
                             args['password'], serversession)
