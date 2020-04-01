@@ -92,7 +92,7 @@ def dbConnection(args):
             todos = serversession.query(todolist).filter(
                 todolist.username == currentUser).order_by(todolist.date_created).all()
             response['status'] = 200
-            response['todos'] = {{'id':todo.id,'item':todo.todoitem} for todo in todos}
+            response['todos'] = [vars(todo) for todo in todos]
         except:
             response['status'] = 500
         return response
