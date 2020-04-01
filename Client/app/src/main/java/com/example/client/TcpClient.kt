@@ -2,7 +2,6 @@ package com.example.client
 
 import java.io.*
 import java.net.*
-import kotlinx.coroutines.*
 
 class TcpClient(private var strSend: String) {
 
@@ -32,6 +31,8 @@ class TcpClient(private var strSend: String) {
                         
                         """.trimIndent()
                 )
+                if("\n" in str)
+                    break
             }
 
             // close the reader, and return the results as a String
