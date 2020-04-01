@@ -26,7 +26,7 @@ class todolist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
     todoitem = db.Column(db.String(150), nullable=False)
-    done = db.Column(db.Boolean, nullable=False, default=False)
+    done = db.Column(db.Boolean, nullable=False)
     date_created = db.Column(db.DateTime,  default=db.func.current_timestamp())
     __table_args__ = (db.Index('UI', username, todoitem, unique=True), {
                       'extend_existing': True})

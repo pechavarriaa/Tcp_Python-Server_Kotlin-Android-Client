@@ -50,7 +50,7 @@ def dbConnection(args):
     def setTodo(todolist, currentUser, todoitem, serversession):
         response = dict()
         try:
-            newTodo = todolist(username=currentUser, todoitem=todoitem)
+            newTodo = todolist(username=currentUser, todoitem=todoitem, done=False)
             serversession.add(newTodo)
             serversession.commit()
             response['status'] = 200
