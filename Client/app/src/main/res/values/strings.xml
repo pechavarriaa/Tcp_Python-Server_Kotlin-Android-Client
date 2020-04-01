@@ -11,4 +11,6 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="sign_up">SIGN UP</string>
     <string name="login_instead">Already Have an account? Login</string>
+    <string name="login">Login</string>
+    <string name="sign_up_instead">Don\'t have an account? sign up</string>
 </resources>
