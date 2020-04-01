@@ -4,3 +4,4 @@ __pycache__/
 serverenv/
 pserver.db
 clientTest.py
+test.py
