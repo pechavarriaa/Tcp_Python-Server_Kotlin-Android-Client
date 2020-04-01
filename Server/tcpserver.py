@@ -165,7 +165,7 @@ class Handler(StreamRequestHandler):
         arglist = json.loads(self.request.recv(1024).decode('utf-8'))
         logging.info("From <%s>: %s" % (self.client_address, arglist))
         response = dbConnection(arglist)
-        self.request.sendall(bytes(response, 'UTF-8'))
+        self.request.sendall(bytes(response+'\n', 'UTF-8'))
 
 
 class Server(TCPServer):

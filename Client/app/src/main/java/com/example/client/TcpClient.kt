@@ -1,11 +1,12 @@
 package com.example.client
+
 import java.io.*
 import java.net.*
-
+import kotlinx.coroutines.*
 
 class TcpClient(private var strSend: String) {
 
-    lateinit var serverResponse : String
+    lateinit var serverResponse: String
 
     @Throws(Exception::class)
     private fun writeToAndReadFromSocket(
@@ -20,8 +21,8 @@ class TcpClient(private var strSend: String) {
             bufferedWriter.flush()
 
             // read text from the socket
-            val bufferedReader =
-                BufferedReader(InputStreamReader(socket.getInputStream()))
+
+            val bufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
             val sb = StringBuilder()
             var str: String
             while (bufferedReader.readLine().also { str = it } != null) {
@@ -72,14 +73,12 @@ class TcpClient(private var strSend: String) {
     }
 
 
-
     init {
         val testServerName = "161.35.10.234"
         val port = 6500
         try {
             // open a socket
             val socket = openSocket(testServerName, port)
-
             // write-to, and read-from the socket.
             // in this case just write a simple command to a web server.
             serverResponse = writeToAndReadFromSocket(socket, strSend)

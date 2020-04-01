@@ -6,6 +6,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,24 +20,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         send_msg.setOnClickListener {
-            data class GetTodos(
-                val user: String,
-                val password: String,
-                val gettodos: Boolean
-            )
+
 
             val gson = Gson()
-            var jsonString = gson.toJson(GetTodos("pechavarriaa", "pepe25", true))
-            var tcpClientTodo = TcpClient(jsonString)
+            val getTheTodos = GetTodos("pechavarriaa", "pepe25", true)
+            var jsonString = gson.toJson(getTheTodos)
+
+
             var itemlist = arrayListOf<String>()
             var adapter = ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_multiple_choice
                 , itemlist
             )
-            // Adding the items to the list when the add button is pressed
+            GlobalScope.launch (Dispatchers.Main){
+                var tcpClientTodo = TcpClient(jsonString)
 
             if ("200" !in tcpClientTodo.serverResponse) {
+                itemlist.add(tcpClientTodo.serverResponse)
                 Toast.makeText(applicationContext, "Message Failed", Toast.LENGTH_SHORT).show()
             } else {
                 val jsonObj = JSONObject(tcpClientTodo.serverResponse)
@@ -45,11 +48,41 @@ class MainActivity : AppCompatActivity() {
                     val itemT = c.getString("item")
                     val doneT = c.getBoolean("done")
                     itemlist.add(itemT)
-
                 }
-                listView.adapter = adapter
-                adapter.notifyDataSetChanged()
             }
+                listView.adapter = adapter
+                adapter.notifyDataSetChanged()}
         }
+
+
     }
+    data class GetTodos(
+        val user:  String? = null,
+        val password:  String? = null,
+        val gettodos:  Boolean? = true
+    )
+    data class MarkTodo(
+        val user:  String? = null,
+        val password:  String? = null,
+        val marktodo:  Int? = 0
+    )
+    data class RemoveTodo(
+        val user:  String? = null,
+        val password:  String? = null,
+        val todoitemremove:  Int? = 0
+    )
+    data class CreateTodo(
+        val user:  String? = null,
+        val password:  String? = null,
+        val todoitem:  String? = null
+    )
+    data class RegisterUser(
+        val user:  String? = null,
+        val password:  String? = null,
+        val register:  Boolean? = true 
+    )
+    data class SignUser(
+        val user:  String? = null,
+        val password:  String? = null
+    )
 }
