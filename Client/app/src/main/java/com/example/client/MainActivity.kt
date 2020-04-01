@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                 android.R.layout.simple_list_item_multiple_choice
                 , itemlist
             )
-            GlobalScope.launch (Dispatchers.Main){
+            GlobalScope.launch (){
                 var tcpClientTodo = TcpClient(jsonString)
 
             if ("200" !in tcpClientTodo.serverResponse) {
