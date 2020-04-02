@@ -54,16 +54,18 @@
 
             <EditText
                 android:id="@+id/username"
-                android:background="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:fontFamily="@font/amatic_sc_bold"
+                android:background="@color/white"
+                android:ems="35"
+                android:fontFamily="sans-serif-condensed"
                 android:hint="@string/username"
-                android:ems="10"
+                android:lines="1"
                 android:maxLines="1"
-                android:lines="1"/>
+                android:inputType="text"
+                android:imeOptions="actionNext"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -74,17 +76,18 @@
 
             <EditText
                 android:id="@+id/password"
-                android:background="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:fontFamily="@font/amatic_sc_bold"
+                android:background="@color/white"
+                android:ems="35"
+                android:fontFamily="sans-serif-condensed"
                 android:hint="@string/password"
                 android:inputType="textPassword"
-                android:ems="10"
+                android:lines="1"
                 android:maxLines="1"
-                android:lines="1"/>
+                android:imeOptions="actionNext"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -95,17 +98,18 @@
 
             <EditText
                 android:id="@+id/confirm_password"
-                android:background="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:fontFamily="@font/amatic_sc_bold"
+                android:background="@color/white"
+                android:ems="35"
+                android:fontFamily="sans-serif-condensed"
                 android:hint="@string/confirm_password"
                 android:inputType="textPassword"
-                android:ems="10"
+                android:lines="1"
                 android:maxLines="1"
-                android:lines="1"/>
+                android:imeOptions="actionDone"/>
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -113,7 +117,6 @@
             android:id="@+id/submit_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_bg"
             android:text="@string/sign_up"
             android:fontFamily="@font/amatic_sc_bold"
             android:textColor="#fff"

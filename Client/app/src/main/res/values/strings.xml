@@ -13,4 +13,5 @@
     <string name="login_instead">Already Have an account? Login</string>
     <string name="login">Login</string>
     <string name="sign_up_instead">Don\'t have an account? sign up</string>
+    <string name="to_do_items">To Do Items</string>
 </resources>

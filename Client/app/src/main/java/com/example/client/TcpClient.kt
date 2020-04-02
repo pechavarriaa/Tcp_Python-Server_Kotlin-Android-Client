@@ -5,7 +5,7 @@ import java.net.*
 
 class TcpClient(private var strSend: String) {
 
-    lateinit var serverResponse: String
+    var serverResponse: String
 
     @Throws(Exception::class)
     private fun writeToAndReadFromSocket(
@@ -31,8 +31,7 @@ class TcpClient(private var strSend: String) {
                         
                         """.trimIndent()
                 )
-                if("\n" in str)
-                    break
+               break
             }
 
             // close the reader, and return the results as a String
