@@ -1,35 +1,44 @@
 package com.example.client
 
-import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
-import kotlinx.android.synthetic.main.login.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
+    private var userLocalStore : UserLocalStore ?= null
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
-        sign_up_instead.setOnClickListener {
+        userLocalStore = UserLocalStore(this)
+
+        if(userLocalStore!!.getLoggedInUser() != null){
             startActivity(
                 Intent(
                     this,
                     MainActivity::class.java
                 ).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             )
+            killActivity()
         }
 
 
+        sign_up_instead.setOnClickListener {
+            startActivity(
+                Intent(
+                    this,
+                    SignActivity::class.java
+                ).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            )
+        }
 
         submit_login.setOnClickListener{
 
@@ -58,6 +67,10 @@ class LoginActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
+
+                        userLocalStore!!.storeUserData(User(username.text.toString(),password.text.toString()))
+                        userLocalStore!!.setUserLoggedIn(true)
+
                         Toast.makeText(applicationContext, "Login successful", Toast.LENGTH_SHORT).show()
                         startActivity(
                             Intent(
@@ -75,7 +88,7 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
-    fun validateForm(username: String, password: String): String {
+    private fun validateForm(username: String, password: String): String {
 
         var resultParse: String = "OK"
 
@@ -92,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
         return resultParse
     }
 
-    suspend fun logIn(jsonString: String): Boolean {
+    private suspend fun logIn(jsonString: String): Boolean {
         var result = true
         withContext(Dispatchers.IO)
         {
