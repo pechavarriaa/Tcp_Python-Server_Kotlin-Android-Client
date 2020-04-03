@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 
 class SignActivity : AppCompatActivity() {
 
+    private var userLocalStore : UserLocalStore ?= null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,11 +46,15 @@ class SignActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
+
+                    userLocalStore!!.storeUserData(User(username.text.toString(),password.text.toString()))
+                    userLocalStore!!.setUserLoggedIn(true)
+
                     Toast.makeText(applicationContext, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
                     startActivity(
                         Intent(
                             this,
-                            LoginActivity::class.java
+                            MainActivity::class.java
                         ).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     )
                     killActivity()
