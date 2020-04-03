@@ -53,6 +53,7 @@ def dbConnection(args):
             newTodo = todolist(username=currentUser, todoitem=todoitem, done=False)
             serversession.add(newTodo)
             serversession.flush()
+            session.refresh(newTodo)
             response['id'] = newTodo.id
             serversession.commit()
             response['status'] = 200
