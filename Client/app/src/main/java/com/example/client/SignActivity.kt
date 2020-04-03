@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 
 class SignActivity : AppCompatActivity() {
 
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up)
@@ -44,17 +45,17 @@ class SignActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
+                    Toast.makeText(applicationContext, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
                     startActivity(
                         Intent(
                             this,
-                            MainActivity::class.java
+                            LoginActivity::class.java
                         ).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     )
                     killActivity()
                 }
             }
         }
-
 
         login_instead.setOnClickListener {
             startActivity(
@@ -69,6 +70,8 @@ class SignActivity : AppCompatActivity() {
     private fun killActivity() {
         finish()
     }
+
+
     fun validateForm(username: String, password: String, confirmPassword: String): String {
 
         var resultParse: String = "OK"
@@ -76,12 +79,14 @@ class SignActivity : AppCompatActivity() {
         if (username.length < 5 || username.length > 20)
             resultParse = "Username should have between 5 and 20 five characters"
 
+        if(username == password)
+            resultParse = "Username and Password must be different"
+
         if (password != confirmPassword)
             resultParse = "Both Passwords should match"
 
         if (password.length < 5 || password.length > 30)
             resultParse = "Username should have between 5 and 30 five characters"
-
 
         return resultParse
     }
