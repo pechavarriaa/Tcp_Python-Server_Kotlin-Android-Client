@@ -1,14 +1,19 @@
 package com.example.client
 
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,11 +26,28 @@ import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
+    private var userLocalStore : UserLocalStore? = null
+    private var listTodos = arrayListOf<Todo>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        ///*
+        userLocalStore = UserLocalStore(this)
+
+        val user: User? = userLocalStore!!.getLoggedInUser()
+        if(user == null)
+        {
+            startActivity(
+                Intent(
+                    this,
+                    LoginActivity::class.java
+                ).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            )
+            killActivity()
+        }
+
+        setSupportActionBar(toolbar as Toolbar?)
         val ab: androidx.appcompat.app.ActionBar? = supportActionBar
         val tv = TextView(applicationContext)
         val lp: RelativeLayout.LayoutParams = RelativeLayout.LayoutParams(
@@ -33,53 +55,87 @@ class MainActivity : AppCompatActivity() {
             androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT
         )
 
-        val user:String = "pechavarriaa"
         tv.layoutParams = lp
-        tv.text = "$user To Do Items"
+        tv.text = "${user!!.username} To Do Items"
         tv.textSize = 20F
         tv.setTextColor(Color.BLACK)
         tv.typeface = ResourcesCompat.getFont(this, R.font.amatic_sc_bold);
         ab?.setBackgroundDrawable(ColorDrawable(0xffB1DCF9.toInt()))
         ab?.displayOptions = androidx.appcompat.app.ActionBar.DISPLAY_SHOW_CUSTOM
         ab?.customView = tv
-        //val actionBar: androidx.appcompat.app.ActionBar? = supportActionBar
-        //actionBar!!.title = "pechavarriaa To Do Items"
-        //actionBar!!.setBackgroundDrawable(ColorDrawable(0xffB1DCF9.toInt()))*/
+
+        populateListView()
+    }
 
 
-        send_msg.setOnClickListener {
 
-            val gson = Gson()
-            val getTheTodos = GetTodos("pechavarriaa", "pepe25", true)
-            val jsonString = gson.toJson(getTheTodos)
 
-            var itemlist = arrayListOf<String>()
-            var adapter = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_list_item_multiple_choice
-                , itemlist
-            )
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        var inflater:MenuInflater = menuInflater;
+        inflater.inflate(R.menu.menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
 
-            var todoList = arrayListOf<Todo>()
-
-            runBlocking {
-                todoList = getTodos(jsonString)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle presses on the action bar menu items
+        when (item.itemId) {
+            R.id.sync -> {
+                populateListView()
+                return true
             }
-
-            if (todoList.size == 1 && todoList[0].taskId == -1) {
-                Toast.makeText(applicationContext, "Error Fetching Todos :(", Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                for (todo in todoList) {
-                    itemlist.add(todo.taskStr)
-                }
-                listView.adapter = adapter
-                adapter.notifyDataSetChanged()
+            R.id.sign_out -> {
+                userLocalStore?.let { logout(it) }
+                return true
             }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun populateListView(){
+
+        val user: User? = userLocalStore!!.getLoggedInUser()
+        val gson = Gson()
+        val getTheTodos = GetTodos(user!!.username, user!!.password, true)
+
+        val jsonString = gson.toJson(getTheTodos)
+
+        var itemlist = arrayListOf<String>()
+        var adapter = ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_list_item_multiple_choice
+            , itemlist
+        )
+        var todoList = arrayListOf<Todo>()
+
+        runBlocking {
+            todoList = getTodos(jsonString)
+        }
+
+        if (todoList.size == 1 && todoList[0].taskId == -1) {
+            Toast.makeText(applicationContext, "Error Fetching Todos :(", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            for (todo in todoList) {
+                itemlist.add(todo.taskStr)
+            }
+            listView.adapter = adapter
+            adapter.notifyDataSetChanged()
         }
     }
 
-    suspend fun getTodos(jsonString: String): ArrayList<Todo> {
+    private fun logout(userLocalStore: UserLocalStore){
+        userLocalStore.clearUserData()
+        userLocalStore.setUserLoggedIn(false)
+        val loginIntent = Intent(this, LoginActivity::class.java)
+        startActivity(loginIntent)
+        killActivity()
+    }
+
+    private fun killActivity() {
+        finish()
+    }
+
+    private suspend fun getTodos(jsonString: String): ArrayList<Todo> {
         val result = ArrayList<Todo>()
         withContext(Dispatchers.IO)
         {
