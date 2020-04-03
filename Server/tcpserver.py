@@ -52,6 +52,7 @@ def dbConnection(args):
         try:
             newTodo = todolist(username=currentUser, todoitem=todoitem, done=False)
             serversession.add(newTodo)
+            response['id'] = newTodo.id
             serversession.commit()
             response['status'] = 200
         except:
