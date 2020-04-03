@@ -35,8 +35,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         userLocalStore = UserLocalStore(this)
-
         val user: User? = userLocalStore!!.getLoggedInUser()
+
+        if(user == null){
+            logout()
+        }
+
+        val gson = Gson()
+        val jsonString = gson.toJson(
+            LoginUser(
+                user?.username,
+                user?.password
+            )
+        )
+        var getLoginUser: Boolean = false
+        runBlocking {
+            getLoginUser = logIn(jsonString)
+        }
+
+        if (!getLoginUser) {
+            logout()
+        }
+
         if (user == null) {
             startActivity(
                 Intent(
@@ -95,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.sign_out -> {
-                userLocalStore?.let { logout(it) }
+                logout()
                 return true
             }
         }
@@ -107,7 +127,7 @@ class MainActivity : AppCompatActivity() {
 
         val user: User? = userLocalStore!!.getLoggedInUser()
         val gson = Gson()
-        val getTheTodos = GetTodos(user!!.username, user!!.password, true)
+        val getTheTodos = GetTodos(user?.username, user?.password, true)
 
         val jsonString = gson.toJson(getTheTodos)
 
@@ -159,15 +179,31 @@ class MainActivity : AppCompatActivity() {
                 .show()
         } else {
             listTodos.add(Todo(createdTodo, false, todoitem))
-            itemlist.add(todoitem)
+            listTodos = listTodos.sortedWith(compareBy({ it.taskDone }, { it.taskId })) as ArrayList<Todo>
+            itemlist.clear()
+            for(todoItem in listTodos){
+                itemlist.add(todoItem.taskStr)
+            }
             listView.adapter = adapter
             adapter.notifyDataSetChanged()
         }
     }
 
-    private fun logout(userLocalStore: UserLocalStore) {
-        userLocalStore.clearUserData()
-        userLocalStore.setUserLoggedIn(false)
+    private suspend fun logIn(jsonString: String): Boolean {
+        var result = true
+        withContext(Dispatchers.IO)
+        {
+            val tcpClientTodo = TcpClient(jsonString)
+            if ("200" !in tcpClientTodo.serverResponse) {
+                result = !result
+            }
+        }
+        return result
+    }
+
+    private fun logout() {
+        userLocalStore?.clearUserData()
+        userLocalStore?.setUserLoggedIn(false)
         val loginIntent = Intent(this, LoginActivity::class.java)
         startActivity(loginIntent)
         killActivity()
@@ -264,6 +300,10 @@ class MainActivity : AppCompatActivity() {
         val taskId: Int,
         val taskDone: Boolean,
         val taskStr: String
+    )
+    data class LoginUser(
+        val user: String? = null,
+        val password: String? = null
     )
 }
 
