@@ -112,6 +112,7 @@ class LoginActivity : AppCompatActivity() {
         }
         return result
     }
+
     data class LoginUser(
         val user: String? = null,
         val password: String? = null
