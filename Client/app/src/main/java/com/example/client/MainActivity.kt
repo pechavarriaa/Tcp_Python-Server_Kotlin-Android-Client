@@ -26,7 +26,7 @@ import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
-    private var userLocalStore : UserLocalStore? = null
+    private var userLocalStore: UserLocalStore? = null
     private var listTodos = arrayListOf<Todo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +36,7 @@ class MainActivity : AppCompatActivity() {
         userLocalStore = UserLocalStore(this)
 
         val user: User? = userLocalStore!!.getLoggedInUser()
-        if(user == null)
-        {
+        if (user == null) {
             startActivity(
                 Intent(
                     this,
@@ -65,13 +64,22 @@ class MainActivity : AppCompatActivity() {
         ab?.customView = tv
 
         populateListView()
+
+        btn_add.setOnClickListener {
+            val strNewTodo = add_todo.text.toString()
+            if (strNewTodo.isNotEmpty()) {
+
+            }
+        }
     }
 
-
-
+    override fun onResume() {
+        super.onResume()
+        populateListView()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        var inflater:MenuInflater = menuInflater;
+        var inflater: MenuInflater = menuInflater;
         inflater.inflate(R.menu.menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
@@ -91,7 +99,8 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun populateListView(){
+
+    private fun populateListView() {
 
         val user: User? = userLocalStore!!.getLoggedInUser()
         val gson = Gson()
@@ -102,20 +111,19 @@ class MainActivity : AppCompatActivity() {
         var itemlist = arrayListOf<String>()
         var adapter = ArrayAdapter<String>(
             this,
-            android.R.layout.simple_list_item_multiple_choice
+            android.R.layout.simple_list_item_checked
             , itemlist
         )
-        var todoList = arrayListOf<Todo>()
 
         runBlocking {
-            todoList = getTodos(jsonString)
+            listTodos = getTodos(jsonString)
         }
 
-        if (todoList.size == 1 && todoList[0].taskId == -1) {
+        if (listTodos.size == 1 && listTodos[0].taskId == -1) {
             Toast.makeText(applicationContext, "Error Fetching Todos :(", Toast.LENGTH_SHORT)
                 .show()
         } else {
-            for (todo in todoList) {
+            for (todo in listTodos) {
                 itemlist.add(todo.taskStr)
             }
             listView.adapter = adapter
@@ -123,7 +131,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun logout(userLocalStore: UserLocalStore){
+    private fun addSingleTodo(todoitem: String) {
+
+        val user: User? = userLocalStore!!.getLoggedInUser()
+        val gson = Gson()
+        val getTheTodos = CreateTodo(user?.username, user?.password, todoitem)
+        val jsonString = gson.toJson(getTheTodos)
+
+        var itemlist = arrayListOf<String>()
+        var adapter = ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_list_item_checked
+            , itemlist
+        )
+
+        var createdTodo: Int = -1
+
+        runBlocking {
+            createdTodo = createTodo(jsonString)
+        }
+
+        if (createdTodo < 0) {
+            Toast.makeText(applicationContext, "Error adding new todo :(", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            listTodos.add(Todo(createdTodo, false, todoitem))
+            itemlist.add(todoitem)
+            listView.adapter = adapter
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun logout(userLocalStore: UserLocalStore) {
         userLocalStore.clearUserData()
         userLocalStore.setUserLoggedIn(false)
         val loginIntent = Intent(this, LoginActivity::class.java)
@@ -157,13 +196,14 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    suspend fun createTodo(jsonString: String): Boolean {
-        var result = true
+    private suspend fun createTodo(jsonString: String): Int {
+        var result = -1
         withContext(Dispatchers.IO)
         {
             val tcpClientTodo = TcpClient(jsonString)
-            if ("200" !in tcpClientTodo.serverResponse) {
-                result = !result
+            if ("200" in tcpClientTodo.serverResponse) {
+                val jsonObj = JSONObject(tcpClientTodo.serverResponse)
+                result = jsonObj.getInt("id")
             }
         }
         return result
