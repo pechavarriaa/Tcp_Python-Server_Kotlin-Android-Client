@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.Editable
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -66,10 +67,12 @@ class MainActivity : AppCompatActivity() {
         populateListView()
 
         btn_add.setOnClickListener {
-            val strNewTodo = add_todo.text.toString()
+            var strNewTodo = add_todo.text.toString()
+            strNewTodo.trim()
             if (strNewTodo.isNotEmpty()) {
-
+                addSingleTodo(strNewTodo)
             }
+            add_todo.setText("")
         }
     }
 
