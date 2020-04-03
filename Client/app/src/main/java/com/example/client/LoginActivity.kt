@@ -30,7 +30,6 @@ class LoginActivity : AppCompatActivity() {
             killActivity()
         }
 
-
         sign_up_instead.setOnClickListener {
             startActivity(
                 Intent(
@@ -67,11 +66,8 @@ class LoginActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-
                         userLocalStore!!.storeUserData(User(username.text.toString(),password.text.toString()))
                         userLocalStore!!.setUserLoggedIn(true)
-
-                        Toast.makeText(applicationContext, "Login successful", Toast.LENGTH_SHORT).show()
                         startActivity(
                             Intent(
                                 this,
