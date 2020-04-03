@@ -18,6 +18,8 @@ class SignActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up)
 
+        userLocalStore = UserLocalStore(this)
+
         submit_sign_up.setOnClickListener {
             val validateStr: String = validateForm(
                 username.text.toString(),
@@ -47,8 +49,8 @@ class SignActivity : AppCompatActivity() {
                     ).show()
                 } else {
 
-                    userLocalStore!!.storeUserData(User(username.text.toString(),password.text.toString()))
-                    userLocalStore!!.setUserLoggedIn(true)
+                    userLocalStore?.storeUserData(User(username.text.toString(),password.text.toString()))
+                    userLocalStore?.setUserLoggedIn(true)
 
                     Toast.makeText(applicationContext, "Sign Up Successful!", Toast.LENGTH_SHORT).show()
                     startActivity(
@@ -75,7 +77,6 @@ class SignActivity : AppCompatActivity() {
     private fun killActivity() {
         finish()
     }
-
 
     fun validateForm(username: String, password: String, confirmPassword: String): String {
 
