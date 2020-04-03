@@ -90,7 +90,7 @@ def dbConnection(args):
         response = dict()
         try:
             todos = serversession.query(todolist).filter(
-                todolist.username == currentUser).order_by(todolist.done, todolist.date_created).all()
+                todolist.username == currentUser).order_by(todolist.done, todolist.id).all()
             response['status'] = 200
             response['todos'] = [{'id':todo.id , 'item':todo.todoitem,'done':todo.done} for todo in todos]
         except:
