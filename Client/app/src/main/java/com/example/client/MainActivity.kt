@@ -1,5 +1,6 @@
 package com.example.client
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             markSingleTodo(position)
         }
         listView.setOnItemLongClickListener{ _, _, position, _ ->
-            val dialogBuilder = AlertDialog.Builder(this, R.style.BarTheme)
+            val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.Theme_MaterialComponents_Light_Dialog_Alert)
             // set message of alert dialog
             dialogBuilder.setMessage("Delete '${listTodos[position].taskStr}' from the to do list?")
                 // positive button text and action
@@ -107,7 +108,6 @@ class MainActivity : AppCompatActivity() {
                 // negative button text and action
                 .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel()
                 }
-
             val alert = dialogBuilder.create()
             alert.setTitle("Delete To Do")
             alert.show()
@@ -321,6 +321,7 @@ class MainActivity : AppCompatActivity() {
             return position.toLong()
         }
 
+        @SuppressLint("ViewHolder")
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val rowView = inflater.inflate(R.layout.list_view_layout, parent, false)
             rowView.findViewById<TextView>(R.id.textView).text = dataList[position].taskStr
