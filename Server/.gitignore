@@ -5,3 +5,4 @@ serverenv/
 pserver.db
 clientTest.py
 test.py
+config.py
