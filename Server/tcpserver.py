@@ -104,7 +104,7 @@ def dbConnection(args):
       Create Engine and session to use db
     '''
     serverengine = create_engine(
-        'sqlite:////home/cs330FinalProject/Server/pserver.db')
+        'sqlite:////home/Tcp_Python-Server_Kotlin-Android-Client/Server/pserver.db')
     metadata = MetaData()
     metadata.reflect(serverengine)
     Base = automap_base(metadata=metadata)
