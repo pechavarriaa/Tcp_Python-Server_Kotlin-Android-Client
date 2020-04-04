@@ -2,7 +2,8 @@
 *.sock
 __pycache__/
 serverenv/
+Downloads/
 pserver.db
 clientTest.py
-test.py
+test.pi
 config.py
