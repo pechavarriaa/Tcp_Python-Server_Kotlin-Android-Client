@@ -6,7 +6,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:fontFamily">"sans-serif-condensed"</item>
     </style>
-    <style name="BarTheme" parent="Theme.MaterialComponents.Light">
+    <style name="BarTheme" parent="ThemeOverlay.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
