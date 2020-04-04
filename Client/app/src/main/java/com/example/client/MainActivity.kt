@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
             markSingleTodo(position)
         }
         listView.setOnItemLongClickListener{ _, _, position, _ ->
-            val dialogBuilder = AlertDialog.Builder(this)
+            val dialogBuilder = AlertDialog.Builder(this, R.style.BarTheme)
             // set message of alert dialog
             dialogBuilder.setMessage("Delete '${listTodos[position].taskStr}' from the to do list?")
                 // positive button text and action
@@ -129,10 +129,6 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle presses on the action bar menu items
         when (item.itemId) {
-            R.id.sync -> {
-                populateListView()
-                return true
-            }
             R.id.sign_out -> {
                 logout()
                 return true
