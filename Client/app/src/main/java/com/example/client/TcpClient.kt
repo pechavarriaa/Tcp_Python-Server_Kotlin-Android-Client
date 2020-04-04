@@ -80,11 +80,9 @@ class TcpClient(private var strSend: String) {
             // open a socket
             val socket = openSocket(testServerName, port)
             // write-to, and read-from the socket.
-            // in this case just write a simple command to a web server.
+
             serverResponse = writeToAndReadFromSocket(socket, strSend)
 
-            // print out the result we got back from the server
-            println(serverResponse)
             // close the socket, and we're done
             socket.close()
         } catch (e: Exception) {
