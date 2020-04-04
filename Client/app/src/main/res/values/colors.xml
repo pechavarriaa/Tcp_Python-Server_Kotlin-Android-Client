@@ -13,5 +13,6 @@
     <color name="sparkGreen">#78F0C9</color>
     <color name="coolSkyBlue">#D5E8F5</color>
     <color name="coolToolbarBlue">#B1DCF9</color>
-
+    <color name="coolGreenBtnAdd">#65C173</color>
+    <color name="coolGreenLightBtnAdd">#89B690</color>
 </resources>
