@@ -1,18 +1,15 @@
 package com.example.client
 
-
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.text.Editable
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.widget.ArrayAdapter
-import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.view.*
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
@@ -28,7 +25,7 @@ import org.json.JSONObject
 class MainActivity : AppCompatActivity() {
 
     private var userLocalStore: UserLocalStore? = null
-    private var listTodos = arrayListOf<Todo>()
+    private var listTodos = mutableListOf<Todo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         userLocalStore = UserLocalStore(this)
         val user: User? = userLocalStore!!.getLoggedInUser()
 
-        if(user == null){
+        if (user == null) {
             logout()
         }
 
@@ -48,6 +45,7 @@ class MainActivity : AppCompatActivity() {
                 user?.password
             )
         )
+
         var getLoginUser: Boolean = false
         runBlocking {
             getLoginUser = logIn(jsonString)
@@ -76,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         tv.layoutParams = lp
-        tv.text = "${user!!.username} To Do Items"
+        tv.text = "${user?.username} To Do Items"
         tv.textSize = 20F
         tv.setTextColor(Color.BLACK)
         tv.typeface = ResourcesCompat.getFont(this, R.font.amatic_sc_bold);
@@ -93,6 +91,27 @@ class MainActivity : AppCompatActivity() {
                 addSingleTodo(strNewTodo)
             }
             add_todo.setText("")
+        }
+
+        listView.setOnItemClickListener { _, _, position, _ ->
+            markSingleTodo(position)
+        }
+        listView.setOnItemLongClickListener{ _, _, position, _ ->
+            val dialogBuilder = AlertDialog.Builder(this)
+            // set message of alert dialog
+            dialogBuilder.setMessage("Delete '${listTodos[position].taskStr}' from the to do list?")
+                // positive button text and action
+                .setPositiveButton("Delete") { _, _ ->
+                    deleteSingleTodo(position)
+                }
+                // negative button text and action
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel()
+                }
+
+            val alert = dialogBuilder.create()
+            alert.setTitle("Delete To Do")
+            alert.show()
+            true
         }
     }
 
@@ -122,21 +141,12 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-
     private fun populateListView() {
 
         val user: User? = userLocalStore!!.getLoggedInUser()
         val gson = Gson()
         val getTheTodos = GetTodos(user?.username, user?.password, true)
-
         val jsonString = gson.toJson(getTheTodos)
-
-        var itemlist = arrayListOf<String>()
-        var adapter = ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_list_item_checked
-            , itemlist
-        )
 
         runBlocking {
             listTodos = getTodos(jsonString)
@@ -146,11 +156,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "Error Fetching Todos :(", Toast.LENGTH_SHORT)
                 .show()
         } else {
-            for (todo in listTodos) {
-                itemlist.add(todo.taskStr)
-            }
-            listView.adapter = adapter
-            adapter.notifyDataSetChanged()
+            listView.adapter = CustomAdapter(this, listTodos as ArrayList<Todo>)
         }
     }
 
@@ -160,14 +166,6 @@ class MainActivity : AppCompatActivity() {
         val gson = Gson()
         val getTheTodos = CreateTodo(user?.username, user?.password, todoitem)
         val jsonString = gson.toJson(getTheTodos)
-
-        var itemlist = arrayListOf<String>()
-        var adapter = ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_list_item_checked
-            , itemlist
-        )
-
         var createdTodo: Int = -1
 
         runBlocking {
@@ -179,13 +177,49 @@ class MainActivity : AppCompatActivity() {
                 .show()
         } else {
             listTodos.add(Todo(createdTodo, false, todoitem))
-            listTodos = listTodos.sortedWith(compareBy({ it.taskDone }, { it.taskId })) as ArrayList<Todo>
-            itemlist.clear()
-            for(todoItem in listTodos){
-                itemlist.add(todoItem.taskStr)
-            }
-            listView.adapter = adapter
-            adapter.notifyDataSetChanged()
+            listTodos.sortWith(compareBy({ it.taskDone }, { it.taskId }))
+            listView.adapter = CustomAdapter(this, listTodos as ArrayList<Todo>)
+        }
+    }
+
+    private fun markSingleTodo(position: Int) {
+
+        val user: User? = userLocalStore?.getLoggedInUser()
+        val gson = Gson()
+        val todoMark = MarkTodo(user?.username, user?.password, listTodos[position].taskId)
+        val jsonString = gson.toJson(todoMark)
+        var markedTodo: Boolean = false
+
+        runBlocking {
+            markedTodo = markTodo(jsonString)
+        }
+        if (!markedTodo) {
+            Toast.makeText(applicationContext, "Error marking todo :(", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            listTodos[position].taskDone = !listTodos[position].taskDone
+            listTodos.sortWith(compareBy({ it.taskDone }, { it.taskId }))
+            listView.adapter = CustomAdapter(this, listTodos as ArrayList<Todo>)
+        }
+    }
+
+    private fun deleteSingleTodo(position: Int) {
+        val user: User? = userLocalStore?.getLoggedInUser()
+        val gson = Gson()
+        val todoMark = RemoveTodo(user?.username, user?.password, listTodos[position].taskId)
+        val jsonString = gson.toJson(todoMark)
+        var deletedTodo: Boolean = false
+
+        runBlocking {
+            deletedTodo = deleteTodo(jsonString)
+        }
+        if (!deletedTodo) {
+            Toast.makeText(applicationContext, "Error deleting todo :(", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            listTodos.removeAt(position)
+            listTodos.sortWith(compareBy({ it.taskDone }, { it.taskId }))
+            listView.adapter = CustomAdapter(this, listTodos as ArrayList<Todo>)
         }
     }
 
@@ -248,7 +282,7 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    suspend fun markTodo(jsonString: String): Boolean {
+    private suspend fun markTodo(jsonString: String): Boolean {
         var result = true
         withContext(Dispatchers.IO)
         {
@@ -260,7 +294,7 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    suspend fun deleteTodo(jsonString: String): Boolean {
+    private suspend fun deleteTodo(jsonString: String): Boolean {
         var result = true
         withContext(Dispatchers.IO)
         {
@@ -270,6 +304,35 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return result
+    }
+
+    class CustomAdapter(
+        private val context: Context,
+        private val dataList: ArrayList<Todo>
+    ) : BaseAdapter() {
+        private val inflater: LayoutInflater =
+            this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        override fun getCount(): Int {
+            return dataList.size
+        }
+
+        override fun getItem(position: Int): Int {
+            return position
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val rowView = inflater.inflate(R.layout.list_view_layout, parent, false)
+            rowView.findViewById<TextView>(R.id.textView).text = dataList[position].taskStr
+            if (dataList[position].taskDone)
+                rowView.findViewById<TextView>(R.id.textView).paintFlags =
+                    Paint.STRIKE_THRU_TEXT_FLAG
+            return rowView
+        }
     }
 
     data class GetTodos(
@@ -298,15 +361,12 @@ class MainActivity : AppCompatActivity() {
 
     data class Todo(
         val taskId: Int,
-        val taskDone: Boolean,
+        var taskDone: Boolean,
         val taskStr: String
     )
+
     data class LoginUser(
         val user: String? = null,
         val password: String? = null
     )
 }
-
-
-
-
