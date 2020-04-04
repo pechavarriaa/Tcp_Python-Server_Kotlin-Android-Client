@@ -57,3 +57,8 @@ and it retrieves all to-do items by a http request using the android sdk
 * Android based application
 * Use of TCP connections
 * Threads using `Dispatcher.IO` to be able to communicate over TCP (since main thread cannot use I/O [see](https://stackoverflow.com/questions/6343166/how-to-fix-android-os-networkonmainthreadexception)) on Android
+
+
+### License
+
+This project is [MIT licensed](./LICENSE).
