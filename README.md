@@ -67,6 +67,7 @@ and it retrieves all to-do items by a http request using the android sdk
 ### Reproducing the project
 * Download the [android apk app](https://todolist.live/download), install the application in your phone, create a user and add/mark/remove todo's
 * Go to the [web app](https://todolist.live) and login with the same username and also add/mark/remove todo's and then sync todo's on android from the menu
+* Check [Youtube Video](https://youtu.be/Dn4gkpNrb3o) for a demo, and a basic explanation of the project
 
 ### License
 
