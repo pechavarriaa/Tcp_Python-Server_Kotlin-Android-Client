@@ -81,6 +81,10 @@ def logout():
 
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     form = SignUpForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
