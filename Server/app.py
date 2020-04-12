@@ -1,12 +1,14 @@
 import sys
-from flask import Flask, redirect, render_template, request, url_for, abort
+from flask import Flask, redirect, render_template, request, url_for, abort, flash, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import URLSafeTimedSerializer
-from flask_login import LoginManager,current_user, login_user, logout_user
+from flask_login import LoginManager, current_user, login_user, logout_user
+from forms import LoginForm, SignUpForm
 from models import User, todolist
 from database import db
+import os
 
-## Setup and Initialization
+# Setup and Initialization
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 db.init_app(app)
@@ -17,38 +19,101 @@ login_manager.init_app(app)
 login_manager.session_protection = "strong"
 login_serializer = URLSafeTimedSerializer(app.secret_key)
 
-## Create models from models.py
+# Create models from models.py
+
+
 def setup_database(app):
     with app.app_context():
         db.create_all()
 
-## login manager
+# login manager
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-## app routes to build endpoints
-@app.route('/')
+# app routes to build endpoints
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # if not current_user.is_authenticated:
-    #     return redirect(url_for('login_users'))
-    return "Hello World!"
-    
+    if not current_user.is_authenticated:
+        return redirect(url_for('login_users'))
 
-@app.route('/sign-in', methods=['GET', 'POST'])
+    user = current_user.username
+    todos = []
+    qry = todolist.query.filter_by(username=user).all()
+    for q in qry:
+        todos.append(q)
+
+    return render_template('index.html', user=user, todos=todos)
+
+
+@app.route('/download', methods=['GET'])
+def download():
+    dwn = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+    return send_from_directory(directory=dwn,
+                               filename='todo_list.apk', mimetype='application/vnd.android.package-archive', as_attachment=True)
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login_users():
-
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    
-    # if request.method == 'POST':
-    return abort(404)
 
-## run app.py to test locally
+    form = LoginForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+            if not user or not user.check_password(form.password.data):
+                flash('Invalid Credentials', category='warning')
+                return render_template('login.html', form=form)
+            login_user(user)
+            return redirect(url_for('index'))
+
+    return render_template('login.html', form=form)
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    if current_user.is_authenticated:
+        logout_user()
+        flash('Succesfully Logout', category='secondary')
+    return redirect(url_for('login_users'))
+
+
+@app.route('/sign-up', methods=['GET', 'POST'])
+def sign_up():
+    form = SignUpForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user:
+            flash('Username is taken', category='warning')
+            return render_template('signup.html', form=form)
+
+        try:
+            new_user = User(
+                username=form.username.data,
+                password=form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            flash(
+                f'Account created for {form.username.data}', category='success')
+        except:
+            flash(f'Error Creating Account', category='danger')
+
+        try:
+            login_user(new_user)
+        except:
+            pass
+
+        return redirect(url_for('index'))
+
+    return render_template('signup.html', form=form)
+
+
+# run app.py to test locally
 if __name__ == '__main__':
     if 'createModels' in sys.argv:
         print("Creating database tables...")
         setup_database(app)
         print("Done!")
     else:
-        app.run(host='0.0.0.0', port=2020, debug=True,use_reloader=False)
+        app.run(host='0.0.0.0', port=2030, debug=True)
