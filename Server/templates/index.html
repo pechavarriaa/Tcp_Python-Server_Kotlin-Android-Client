@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}Home {% endblock %}
+
+{% block body %}
+<!-- row of messages -->
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+    </div>
+</div>
+<!-- add todo list here -->
+<div class="row justify-content-center">
+    <h4 class="col-lg-8 col-md-10 col-12">{{user}} Todo List</h4>
+    <ul class="col-lg-8 col-md-10 col-12">
+        {% for item in todos %}
+        {%  if item.done %}
+        <li id={{item.id}}>{{item.todoitem}}</li>
+        {% else %}
+        <li id={{item.id}} style="text-decoration: line-through;">{{item.todoitem}}</li>
+        {% endif %}
+        {%endfor%}
+    </ul>
+</div>
+{% endblock %}
