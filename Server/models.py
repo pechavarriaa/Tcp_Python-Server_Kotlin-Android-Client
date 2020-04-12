@@ -31,5 +31,7 @@ class todolist(db.Model):
     __table_args__ = (db.Index('UI', username, todoitem, unique=True), {
                       'extend_existing': True})
 
-    def __init__(self, todoitem):
+    def __init__(self, username, todoitem, done):
+        self.username = username
         self.todoitem = todoitem
+        self.done = done
