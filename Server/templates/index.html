@@ -1,7 +1,87 @@
 {% extends "layout.html" %}
 
 {% block title %}Home {% endblock %}
+{% block head %}
+{{ super() }}
+<style>
+    #snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+    }
 
+    #snackbar.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    .align-ul-center {
+        -ms-flex-align: center !important;
+        align-items: center !important;
+        display: flex;
+        justify-content: center;
+    }
+
+    @-webkit-keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @-webkit-keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+
+    @keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}
 {% block body %}
 <!-- row of messages -->
 <div class="row justify-content-center">
@@ -17,17 +97,158 @@
         {% endfor %} {% endif %} {% endwith %}
     </div>
 </div>
-<!-- add todo list here -->
-<div class="row justify-content-center">
-    <h4 class="col-lg-8 col-md-10 col-12">{{user}} Todo List</h4>
-    <ul class="col-lg-8 col-md-10 col-12">
-        {% for item in todos %}
-        {%  if item.done %}
-        <li id={{item.id}}>{{item.todoitem}}</li>
-        {% else %}
-        <li id={{item.id}} style="text-decoration: line-through;">{{item.todoitem}}</li>
-        {% endif %}
-        {%endfor%}
-    </ul>
+<!-- snackbar for notifications -->
+<div id="snackbar">
+    <h6 id="toastmsg"></h6>
 </div>
+<!-- add todo list here -->
+<div class="row justify-content-center" style="text-align: center;">
+    <h4 class="col-lg-8 col-md-10 col-12">{{user}} Todo List</h4>
+    <div class="border-top col-lg-6 col-md-8 col-10 mt-2" style="text-align: start;">
+        <small>Click item to mark it, Double click to delete it</small>
+    </div>
+    <div class="input-group m-2 col-lg-6 col-md-8 col-12 mt-1 pt-1 px-2">
+        <input type="text" class="form-control" placeholder="Add new todo" id='newtodo'>
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="sbtodo" onclick="addNewTodo()">Add Todo</button>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-10 col-12 px-4 mx-4 m-3 d-flex justify-content-center">
+        <ul id="todos" style="text-align: start;">
+            {% for item in todos %}
+            {%  if item.done %}
+            <li id={{item.id}} style="text-decoration: line-through;" class="lilist">{{item.todoitem}}</li>
+            {% else %}
+            <li id={{item.id}} class="lilist">{{item.todoitem}}</li>
+            {% endif %}
+            {%endfor%}
+        </ul>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    function addNewTodo() {
+        var todoitem = $('#newtodo').val();
+        $('#newtodo').val('');
+        $.ajax({
+            url: `/addtodo?todo=${todoitem}`,
+            dataType: "json",
+            success: function (data) {
+                if (data.answer == "OK") {
+                    $('#todos').empty();
+                    for (var x = 0; x < data.todos.length; x++) {
+                        if (data.todos[x].done) {
+                            $("#todos").append(`<li style="text-decoration: line-through;" id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                        else {
+                            $("#todos").append(`<li id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                    }
+                }
+                else if (data.answer == "DUPLICATE") {
+                    $("#toastmsg").text('Todo already exists');
+                    displayToast();
+                }
+                else {
+                    $("#toastmsg").text('Error while adding todo');
+                    displayToast();
+                }
+            }
+        });
+    }
+    function marktodo(todoid) {
+        $.ajax({
+            url: `/marktodo?todoid=${todoid}`,
+            dataType: "json",
+            success: function (data) {
+                if (data.answer == "OK") {
+                    $('#todos').empty();
+                    for (var x = 0; x < data.todos.length; x++) {
+                        if (data.todos[x].done) {
+
+                            $("#todos").append(`<li style="text-decoration: line-through;" id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                        else {
+
+                            $("#todos").append(`<li id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                    }
+                }
+                else {
+                    $("#toastmsg").text('Error marking todo');
+                    displayToast();
+                }
+            }
+        });
+    }
+    function deletetodo(todoid) {
+        $.ajax({
+            url: `/deletetodo?todoid=${todoid}`,
+            dataType: "json",
+            success: function (data) {
+                if (data.answer == "OK") {
+                    $('#todos').empty();
+                    for (var x = 0; x < data.todos.length; x++) {
+                        if (data.todos[x].done) {
+                            $("#todos").append(`<li style="text-decoration: line-through;" id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                        else {
+                            $("#todos").append(`<li id=${data.todos[x].id} class="lilist">${data.todos[x].todoitem}</li>`);
+                        }
+                    }
+                }
+                else {
+                    $("#toastmsg").text('Error deleting todo');
+                    displayToast();
+                }
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var DELAY = 400, clicks = 0, timer = null;
+        idtodo = -1;
+        $("#todos").on("click", ".lilist", function (e) {
+            if (idtodo == -1)
+                clicks++;
+            if (idtodo == $(this).attr("id"))
+                clicks++;
+            idtodo = $(this).attr("id");
+            if (clicks === 1) {
+                timer = setTimeout(function () {
+                    console.log('mark', idtodo);
+                    clicks = 0;
+                    marktodo(idtodo);
+                    idtodo = -1;
+                }, DELAY);
+            } else {
+                clearTimeout(timer);
+                clicks = 0;
+                deletetodo(idtodo);
+                idtodo = -1;
+            }
+        })
+            .on("dblclick", ".lilist", function (e) {
+                e.preventDefault();
+            });
+    });
+</script>
+<script type="text/javascript">
+    function displayToast() {
+        var x = document.getElementById("snackbar");
+        x.className = "show";
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+    }
+</script>
+<script>
+    var input = document.getElementById("newtodo");
+    input.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("sbtodo").click();
+        }
+    });
+</script>
 {% endblock %}
