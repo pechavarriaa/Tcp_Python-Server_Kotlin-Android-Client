@@ -1,11 +1,12 @@
 import sys
-from flask import Flask, redirect, render_template, request, url_for, abort, flash, send_from_directory, send_file
+from flask import Flask, redirect, render_template, request, url_for, abort, flash, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import LoginManager, current_user, login_user, logout_user
 from forms import LoginForm, SignUpForm
 from models import User, todolist
 from database import db
+from functools import wraps
 import os
 
 # Setup and Initialization
@@ -31,6 +32,17 @@ def setup_database(app):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if current_user.is_active:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('login_users'))
+    return wrap
+
+
 # app routes to build endpoints
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -39,7 +51,8 @@ def index():
 
     user = current_user.username
     todos = []
-    qry = todolist.query.filter_by(username=user).all()
+    qry = todolist.query.filter_by(username=user).order_by(
+        todolist.done, todolist.id).all()
     for q in qry:
         todos.append(q)
 
@@ -112,6 +125,95 @@ def sign_up():
 
     return render_template('signup.html', form=form)
 
+
+@app.route('/addtodo')
+@login_required
+def addtodo():
+    if 'todo' not in request.args:
+        return jsonify(answer='MISSING_ARGUMENT')
+    todoitem = request.args['todo']
+    user = current_user.username
+    if db.session.query(todolist.id).filter_by(
+            username=user, todoitem=todoitem).scalar() is not None:
+        return jsonify(answer='DUPLICATE')
+
+    todos = []
+    toadd = todolist(user, todoitem, False)
+    try:
+        db.session.add(toadd)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify(answer='INSERTION ERROR')
+
+    qry = todolist.query.filter_by(username=current_user.username).order_by(
+        todolist.done, todolist.id).all()
+    for q in qry:
+        td = q.__dict__
+        del td['_sa_instance_state']
+        todos.append(q.__dict__)
+
+    return jsonify(answer='OK', todos=todos)
+
+
+@app.route('/marktodo')
+@login_required
+def marktodo():
+    if 'todoid' not in request.args:
+        return jsonify(answer='MISSING_ARGUMENT')
+
+    todoid = request.args['todoid']
+
+    if db.session.query(todolist.id).filter_by(id=todoid, username=current_user.username).scalar() is None:
+        return jsonify(answer='ID_NOT_FOUND')
+
+    todo = todolist.query.filter_by(id=todoid).first()
+    todo.done = not todo.done
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify(answer='UPDATE_ERROR')
+
+    todos = []
+    qry = todolist.query.filter_by(username=current_user.username).order_by(
+        todolist.done, todolist.id).all()
+    for q in qry:
+        td = q.__dict__
+        del td['_sa_instance_state']
+        todos.append(q.__dict__)
+
+    return jsonify(answer='OK', todos=todos)
+
+
+@app.route('/deletetodo')
+@login_required
+def deletetodo():
+    if 'todoid' not in request.args:
+        return jsonify(answer='MISSING_ARGUMENT')
+
+    todoid = request.args['todoid']
+    if db.session.query(todolist.id).filter_by(id=todoid, username=current_user.username).scalar() is None:
+        return jsonify(answer='ID_NOT_FOUND')
+
+    todo = todolist.query.filter_by(id=todoid).first()  
+    try:
+        db.session.delete(todo)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify(answer='DELETE_ERROR')
+
+    todos = []
+    qry = todolist.query.filter_by(username=current_user.username).order_by(
+        todolist.done, todolist.id).all()
+    for q in qry:
+        td = q.__dict__
+        del td['_sa_instance_state']
+        todos.append(q.__dict__)
+
+    return jsonify(answer='OK', todos=todos)
 
 # run app.py to test locally
 if __name__ == '__main__':
