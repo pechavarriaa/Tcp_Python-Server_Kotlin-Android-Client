@@ -1,9 +1,10 @@
 # Android Tcp Client Kotlin - Python Tcp Server
 Assignment #5 Android App Sockets To-do List
-
+Pablo Echavarria
+ID# 200385648
 This project has two core parts which are the following
 
-### Server side
+### [Server side](https://github.com/pechavarriaa/Tcp_Python-Server_Kotlin-Android-Client/blob/master/Server)
 The server side part receives messages from client via TCP,
 and implements the following operations :
 * Authenticate User
@@ -28,7 +29,7 @@ with gunicorn and nginx as shown in the following [blog](https://www.digitalocea
 the systemd services to run the TCP server application for getting request via TCP
 were created similarly like in the following [gist](https://gist.github.com/kylemanna/d193aaa6b33a89f649524ad27ce47c4b) 
 
-### Client side
+### [Client side](https://github.com/pechavarriaa/Tcp_Python-Server_Kotlin-Android-Client/blob/master/Client)
 The client side of this application is an android [app](https://github.com/pechavarriaa/Tcp_Python-Server_Kotlin-Android-Client/tree/master/Client),
 that registers a user and saves its credentials with a custom [user object](https://github.com/pechavarriaa/Tcp_Python-Server_Kotlin-Android-Client/blob/master/Client/app/src/main/java/com/example/client/UserLocalStore.kt) using android shared preferences to keep the user logged-in when
 the user opens and closes the application.
@@ -58,6 +59,14 @@ and it retrieves all to-do items by a http request using the android sdk
 * Use of TCP connections
 * Threads using `Dispatcher.IO` to be able to communicate over TCP (since main thread cannot use I/O [see](https://stackoverflow.com/questions/6343166/how-to-fix-android-os-networkonmainthreadexception)) on Android
 
+### Challenges
+* Creating a coroutine with kotlin for opening a new thread and sending and receiving information over tcp
+* Setting up tcp server with a systemd service on the server
+* Creating a custom adapter for the listview on the mainactivity with kotlin, to present the todo's
+
+### Reproducing the project
+* Download the [android apk app](https://todolist.live/download), install the application in your phone, create a user and add/mark/remove todo's
+* Go to the [web app](https://todolist.live) and login with the same username and also add/mark/remove todo's and then sync todo's on android from the menu
 
 ### License
 
