@@ -129,6 +129,12 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle presses on the action bar menu items
         when (item.itemId) {
+            R.id.sync -> {
+               populateListView()
+                return true
+            }
+        }
+        when (item.itemId) {
             R.id.sign_out -> {
                 logout()
                 return true
