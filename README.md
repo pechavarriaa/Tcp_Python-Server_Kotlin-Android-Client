@@ -1,7 +1,5 @@
 # Android Tcp Client Kotlin - Python Tcp Server
-Assignment #5 Android App Sockets To-do List
-Pablo Echavarria
-ID# 200385648
+Android App Sockets To-do List
 This project has two core parts which are the following
 
 ### [Server side](https://github.com/pechavarriaa/Tcp_Python-Server_Kotlin-Android-Client/blob/master/Server)
